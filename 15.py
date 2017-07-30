@@ -6,7 +6,6 @@ from queue import PriorityQueue
 N=4
 
 def moves(position):
-    assert set(position) == set(range(N*N))
     blank = position.index(N*N-1)
     i, j = divmod(blank, N)
     offsets = []
@@ -24,18 +23,32 @@ def loss(position):
 def board_str(position):
     return '\n'.join((N*'{:3}').format(*[(i+1)%(N*N) for i in position[i:]]) for i in range(0, N*N, N))
 
-class Path:
+def parity(permutation):
+    assert set(permutation) == set(range(N*N))
+    #return sum(x<y and px>py for (x, px) in enumerate(permutation) for (y, py) in enumerate(permutation))%2
+    seen, cycles = set(), 0
+    for i in permutation:
+        if i not in seen:
+            cycles += 1
+            while i not in seen:
+                seen.add(i)
+                i = permutation[i]
+    return (cycles+len(permutation)) % 2
+
+class Path: # For PriorityQueue, to make "<" do the right thing.
     def __init__(self, positions):
         self.positions = positions
         self.loss = loss(self.last())
-    def __lt__(self, other): return self.loss < other.loss
+    def __lt__(self, other): return self.loss < other.loss # All we want, really.
     def last(self): return self.positions[-1]
     def __str__(self): return '\n\n'.join([board_str(p) for p in self.positions])
 
-path = Path([tuple((i-1)%16 for i in (2, 4, 6, 12, 1, 5, 8, 3, 9, 10, 15, 11, 13, 14, 7, 0))])
+start = tuple((i-1)%16 for i in (2, 4, 6, 12, 1, 5, 8, 3, 9, 10, 15, 11, 13, 14, 7, 0))
+assert parity(start) == 0
+path = Path([start])
 candidates = PriorityQueue()
 candidates.put(path)
-visited = set([path.last()])
+visited = set([path.last()]) # Tuples rather than lists so they go into a set.
 while path.last() != tuple(range(N*N)):
     path = candidates.get()
     for k in moves(path.last()):
