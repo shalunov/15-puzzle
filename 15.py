@@ -2,6 +2,7 @@
 # Use A* search to solve the Game of 15. By Stanislav Shalunov, July 2017.
 
 from queue import PriorityQueue
+from random import shuffle
 
 N=4
 
@@ -20,9 +21,6 @@ def moves(position):
 def loss(position):
     return sum(abs(i//N - position[i]//N) + abs(i%N - position[i]%N) for i in range(N*N))
 
-def board_str(position):
-    return '\n'.join((N*'{:3}').format(*[(i+1)%(N*N) for i in position[i:]]) for i in range(0, N*N, N))
-
 def parity(permutation):
     assert set(permutation) == set(range(N*N))
     #return sum(x<y and px>py for (x, px) in enumerate(permutation) for (y, py) in enumerate(permutation))%2
@@ -35,24 +33,35 @@ def parity(permutation):
                 i = permutation[i]
     return (cycles+len(permutation)) % 2
 
-class Path: # For PriorityQueue, to make "<" do the right thing.
-    def __init__(self, positions):
-        self.positions = positions
-        self.loss = loss(self.last())
+class Position: # For PriorityQueue, to make "<" do the right thing.
+    def __init__(self, position):
+        self.position = position
+        self.loss = loss(position)
     def __lt__(self, other): return self.loss < other.loss # All we want, really.
-    def last(self): return self.positions[-1]
-    def __str__(self): return '\n\n'.join([board_str(p) for p in self.positions])
+    def __str__(self): return '\n'.join((N*'{:3}').format(*[(i+1)%(N*N) for i in self.position[i:]]) for i in range(0, N*N, N))
 
-start = tuple((i-1)%16 for i in (2, 4, 6, 12, 1, 5, 8, 3, 9, 10, 15, 11, 13, 14, 7, 0))
+start = list(range(N*N-1))
+shuffle(start)
+start += [N*N-1]
+start = tuple(start)
 assert parity(start) == 0
-path = Path([start])
+p = Position(start)
 candidates = PriorityQueue()
-candidates.put(path)
-visited = set([path.last()]) # Tuples rather than lists so they go into a set.
-while path.last() != tuple(range(N*N)):
-    path = candidates.get()
-    for k in moves(path.last()):
+candidates.put(p)
+visited = set([p]) # Tuples rather than lists so they go into a set.
+came_from = {p.position: None}
+
+while p.position != tuple(range(N*N)):
+    p = candidates.get()
+    for k in moves(p.position):
         if k not in visited:
-            candidates.put(Path(path.positions + [k]))
+            candidates.put(Position(k))
+            came_from[k] = p
             visited.add(k)
-print(path)
+
+while p.position != start:
+    print(p, "\n")
+    p = came_from[p.position]
+
+import resource
+print((resource.getrusage(resource.RUSAGE_SELF).ru_maxrss), 'RAM')
