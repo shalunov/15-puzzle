@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Use A* search to solve the Game of 15. By Stanislav Shalunov, July 2017.
+# Use A* search to solve the Game of 15. By Stanislav Shalunov, M.Andreev July 2017.
 
 from queue import PriorityQueue
 from random import shuffle
@@ -34,10 +34,11 @@ def parity(permutation):
     return (cycles+len(permutation)) % 2
 
 class Position: # For PriorityQueue, to make "<" do the right thing.
-    def __init__(self, position):
+    def __init__(self, position, start_distance):
         self.position = position
         self.loss = loss(position)
-    def __lt__(self, other): return self.loss < other.loss # All we want, really.
+        self.start_distance = start_distance
+    def __lt__(self, other): return self.loss + self.start_distance < other.loss + other.start_distance # All we want, really.
     def __str__(self): return '\n'.join((N*'{:3}').format(*[(i+1)%(N*N) for i in self.position[i:]]) for i in range(0, N*N, N))
 
 start = list(range(N*N-1))
@@ -45,7 +46,7 @@ shuffle(start)
 start += [N*N-1]
 start = tuple(start)
 assert parity(start) == 0
-p = Position(start)
+p = Position(start, 0)
 candidates = PriorityQueue()
 candidates.put(p)
 visited = set([p]) # Tuples rather than lists so they go into a set.
@@ -55,7 +56,7 @@ while p.position != tuple(range(N*N)):
     p = candidates.get()
     for k in moves(p.position):
         if k not in visited:
-            candidates.put(Position(k))
+            candidates.put(Position(k,p.start_distance+1))
             came_from[k] = p
             visited.add(k)
 
