@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-# Use A* search to solve the Game of 15. By Stanislav Shalunov, M.Andreev July 2017.
+# Use A* search, greedy search or Dijkstra algorithm to solve the Game of 15. By Stanislav Shalunov, M.Andreev July 2017.
 
 from queue import PriorityQueue
 from random import shuffle
 
 N=4
+SEARCH_TYPE = "greedy" # implemented: greedy, A*, dijkstra
 
 def moves(position):
     blank = position.index(N*N-1)
@@ -38,7 +39,15 @@ class Position: # For PriorityQueue, to make "<" do the right thing.
         self.position = position
         self.loss = loss(position)
         self.start_distance = start_distance
-    def __lt__(self, other): return self.loss + self.start_distance < other.loss + other.start_distance # All we want, really.
+    def __lt__(self, other): # For A* and Dijkstra start_distance is indeed distance to start position
+        if SEARCH_TYPE == "greedy":
+            return self.loss < other.loss
+        elif SEARCH_TYPE == "A*":
+            return self.loss + self.start_distance < other.loss + other.start_distance
+        elif SEARCH_TYPE == "dijkstra":
+            return self.start_distance < other.start_distance
+        else:
+            raise NotImplementedError
     def __str__(self): return '\n'.join((N*'{:3}').format(*[(i+1)%(N*N) for i in self.position[i:]]) for i in range(0, N*N, N))
 
 start = list(range(N*N-1))
@@ -46,6 +55,7 @@ shuffle(start)
 start += [N*N-1]
 start = tuple(start)
 assert parity(start) == 0
+print (start)
 p = Position(start, 0)
 candidates = PriorityQueue()
 candidates.put(p)
