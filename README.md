@@ -1,8 +1,6 @@
 # 15-puzzle
-We implement different search algorithms to find a path from (random) start position to position, where puzzle is solved.
+We implement three search algorithms to find a solution from a random start position:
 
-Three different algorithms are present:
-
-1. Greedy search - empirically the fastest one, but it finds one of the paths from start position to end position, no guarantee that this path is optimal.
-1. Dijkstra algorithm - classical distance search algorithm. Guarantees the shortest path, but require lots of resource.
-1. A\* search - Guarantees shortest path, works faster and require less resource than Dijkstra.
+1. Greedy: empirically the fastest one, but solutions can be long.
+1. Dijkstra algorithm: guarantees the shortest path, but requires lots of resources.
+1. A\* search: faster than Dijkstra, better than greedy.
