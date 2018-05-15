@@ -23,7 +23,7 @@ def loss(position):
     return sum(abs(i//N - position[i]//N) + abs(i%N - position[i]%N) for i in range(N*N - 1))
 
 def parity(permutation):
-    assert set(permutation) == set(range(N*N))
+    #assert set(permutation) == set(range(N*N))
     #return sum(x<y and px>py for (x, px) in enumerate(permutation) for (y, py) in enumerate(permutation))%2
     seen, cycles = set(), 0
     for i in permutation:
@@ -51,10 +51,11 @@ class Position: # For PriorityQueue, to make "<" do the right thing.
     def __str__(self): return '\n'.join((N*'{:3}').format(*[(i+1)%(N*N) for i in self.position[i:]]) for i in range(0, N*N, N))
 
 start = list(range(N*N-1))
-shuffle(start)
+while 1:
+    shuffle(start)
+    if parity(start) == 0: break
 start += [N*N-1]
 start = tuple(start)
-assert parity(start) == 0
 print (start)
 p = Position(start, 0)
 candidates = PriorityQueue()
