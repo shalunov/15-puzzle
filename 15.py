@@ -20,7 +20,7 @@ def moves(position):
         yield tuple(position[swap] if x==blank else position[blank] if x==swap else position[x] for x in range(N*N))
 
 def loss(position):
-    return sum(abs(i//N - position[i]//N) + abs(i%N - position[i]%N) for i in range(N*N))
+    return sum(abs(i//N - position[i]//N) + abs(i%N - position[i]%N) for i in range(N*N - 1))
 
 def parity(permutation):
     assert set(permutation) == set(range(N*N))
